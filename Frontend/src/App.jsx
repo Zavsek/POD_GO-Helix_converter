@@ -56,12 +56,12 @@ function App() {
             type="file"
             accept=".pgp"
             onChange={(e) => setFile(e.target.files[0])}
-            className="block w-full text-sm text-gray-200 bg-slate-800 border border-slate-600 rounded-lg cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 transition mb-6"
+            className="block w-full text-sm text-gray-200 bg-slate-800 border border-slate-600 rounded-lg cursor-pointer transition-all duration-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 mb-6"
           />
 
           <button
             onClick={handleConvert}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-200"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer"
           >
             Convert to .hlx
           </button>
