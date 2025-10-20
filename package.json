@@ -1,14 +1,18 @@
 {
   "name": "pod_go-helix_converter",
+  "productName": "Pod GO to Helix converter",
   "version": "1.0.0",
+  "type": "module",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron ."
   },
   "author": "Zavsek",
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "electron": "^38.3.0"
+    "electron": "^38.3.0",
+    "nodemon": "^3.1.10",
+    "tailwindcss": "^4.1.14"
   }
 }
