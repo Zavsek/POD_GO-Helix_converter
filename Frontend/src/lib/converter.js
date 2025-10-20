@@ -1,9 +1,8 @@
-// ./lib/converter.js
-
 import isReverb from "./helpers/isReverb";
 import setMonoStereo from "./helpers/setMonoStereo";
 import trimModelName from "./helpers/trimModelName";
 import { appendDsp0, appendDsp1 } from "./helpers/appendEnd";
+import toast from "react-hot-toast";
 
 export function convertToHlxLogic(podGo) {
   const presetName = podGo.data?.meta?.name || "Untitled";
@@ -82,6 +81,6 @@ function convertDsp(dsp) {
 
   appendDsp0(dsp0);
   appendDsp1(dsp1);
-
+  toast.success("Success!")
   return { dsp0, dsp1 };
 }
