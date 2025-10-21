@@ -32,22 +32,37 @@ function convertDsp(dsp) {
   const dsp0 = {};
   const dsp1 = {};
 
-  for (const [key, block] of Object.entries(dsp)) {
-    if (typeof block !== "object" || block === null) {
-      dsp0[key] = block;
-      continue;
-    }
+  // 🔹 Sistemski bloki, ki jih ignoriramo pri razvrščanju
+  const sistemskiBloki = ["input", "output", "split", "join", "inputA", "inputB", "outputA", "outputB"];
 
-    const newBlock = { ...block };
-    let model = newBlock["@model"] || "";
+  // 🔹 Zberi vse veljavne bloke (učinke)
+  const vsiBloki = Object.entries(dsp)
+    .filter(([ime, blok]) =>
+      typeof blok === "object" &&
+      blok !== null &&
+      !sistemskiBloki.includes(ime.toLowerCase())
+    )
+    .map(([ime, blok]) => {
+      const model = (blok["@model"] || "").replace(/_STATIC_/gi, "");
+      return {
+        key: ime,
+        model: trimModelName(model),
+        blok: { ...blok, "@model": trimModelName(model) },
+      };
+    });
 
-    // 🔹 odstrani "_STATIC_" iz imena modela
-    model = model.replace(/_STATIC_/gi, "");
+  // 🔹 Sortiraj glede na @position, če obstaja
+  vsiBloki.sort((a, b) => {
+    const posA = a.blok["@position"] ?? 0;
+    const posB = b.blok["@position"] ?? 0;
+    return posA - posB;
+  });
 
-    // 🔹 počisti model (odstrani Mono/Stereo na koncu)
-    newBlock["@model"] = trimModelName(model);
+  // 🔹 Razporedi med dsp0 in dsp1 glede na indeks
+  vsiBloki.forEach(({ blok }, index) => {
+    const model = blok["@model"] || "";
 
-    // 🔹 obdelaj reverb
+    // Stereo/Mono logika
     if (isReverb(model)) {
       const stereoReverbs = [
         "DynamicHall", "DynamicPlate", "DynamicRoom", "DynamicAmbiance",
@@ -55,32 +70,30 @@ function convertDsp(dsp) {
         "Plateaux", "DoubleTank"
       ];
       const isStereo = stereoReverbs.some(r => model.toLowerCase().includes(r.toLowerCase()));
-      newBlock["@stereo"] = isStereo; // vedno nastavi true/false
+      blok["@stereo"] = isStereo;
     } else {
       const stereoValue = setMonoStereo(model);
-      newBlock["@stereo"] = stereoValue !== null ? stereoValue : false;
+      blok["@stereo"] = stereoValue !== null ? stereoValue : false;
     }
 
-    newBlock["@path"] = 0;
-
-    const blockNumber = parseInt(key.replace("block", ""));
-    if (!isNaN(blockNumber)) {
-      if (blockNumber <= 7) {
-        newBlock["@position"] = blockNumber;
-        dsp0[key] = newBlock;
-      } else {
-        // 🔹 premik v dsp1 in preimenovanje block8 → block0, block9 → block1
-        const newKey = `block${blockNumber - 8}`;
-        newBlock["@position"] = blockNumber - 8;
-        dsp1[newKey] = newBlock;
-      }
+    // 🔹 Nastavi path in position
+    if (index < 8) {
+      blok["@path"] = 0;
+      blok["@position"] = index;
+      dsp0[`block${index}`] = blok;
     } else {
-      dsp0[key] = newBlock;
+      blok["@path"] = 0;
+      blok["@position"] = index - 8;
+      dsp1[`block${index - 8}`] = blok;
     }
-  }
+  });
 
+  // 🔹 Vedno dodaj konec (input/split/join/output)
   appendDsp0(dsp0);
   appendDsp1(dsp1);
-  toast.success("Success!")
+
+  toast.success("Konverzija uspešna!");
   return { dsp0, dsp1 };
 }
+
+

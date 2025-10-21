@@ -5,15 +5,36 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build-frontend": "cd frontend && npm install && npm run build",
+    "dist": "npm run build-frontend && electron-builder"
   },
   "author": "Zavsek",
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "electron": "^38.3.0",
+    "dotenv": "^17.2.3",
     "nodemon": "^3.1.10",
     "path": "^0.12.7",
     "tailwindcss": "^4.1.14"
+  },
+  "devDependencies": {
+    "electron": "^38.3.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.filip.podgohelix",
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "Frontend/dist/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }
