@@ -32,10 +32,8 @@ function convertDsp(dsp) {
   const dsp0 = {};
   const dsp1 = {};
 
-  // 🔹 Sistemski bloki, ki jih ignoriramo pri razvrščanju
   const sistemskiBloki = ["input", "output", "split", "join", "inputA", "inputB", "outputA", "outputB"];
 
-  // 🔹 Zberi vse veljavne bloke (učinke)
   const vsiBloki = Object.entries(dsp)
     .filter(([ime, blok]) =>
       typeof blok === "object" &&
@@ -49,18 +47,23 @@ function convertDsp(dsp) {
         model: trimModelName(model),
         blok: { ...blok, "@model": trimModelName(model) },
       };
-    });
+    })
+    // 🔹 DODANO: izloči bloke brez modela
+    .filter(({ model }) => model.trim() !== "");
 
-  // 🔹 Sortiraj glede na @position, če obstaja
   vsiBloki.sort((a, b) => {
     const posA = a.blok["@position"] ?? 0;
     const posB = b.blok["@position"] ?? 0;
     return posA - posB;
   });
 
-  // 🔹 Razporedi med dsp0 in dsp1 glede na indeks
   vsiBloki.forEach(({ blok }, index) => {
     const model = blok["@model"] || "";
+
+    // preskoči fxloop
+    if (model.toLowerCase().includes("fxloop")) {
+      return;
+    }
 
     // Stereo/Mono logika
     if (isReverb(model)) {
@@ -76,7 +79,6 @@ function convertDsp(dsp) {
       blok["@stereo"] = stereoValue !== null ? stereoValue : false;
     }
 
-    // 🔹 Nastavi path in position
     if (index < 8) {
       blok["@path"] = 0;
       blok["@position"] = index;
@@ -88,12 +90,12 @@ function convertDsp(dsp) {
     }
   });
 
-  // 🔹 Vedno dodaj konec (input/split/join/output)
   appendDsp0(dsp0);
   appendDsp1(dsp1);
 
   toast.success("Konverzija uspešna!");
   return { dsp0, dsp1 };
 }
+
 
 
