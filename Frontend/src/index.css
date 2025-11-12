@@ -14,7 +14,7 @@ body {
 }
 
 .animate-bg-shine {
-  animation: bg-shine 5s linear infinite;
+  animation: bg-shine 10s linear infinite;
 }
 
 @theme{

@@ -1,3 +1,5 @@
+import { minimize, close } from '../lib/tauriWindow.js'
+
 export default function TitleBar() {
   return (
     <div
@@ -8,14 +10,14 @@ export default function TitleBar() {
 
       <div className="flex space-x-1" style={{ WebkitAppRegion: "no-drag" }}>
         <button
-          className="pr-3 pl-3 p-1 hover:bg-slate-700 rounded-b rounded-l text-gray-300 cursor-pointer"
-          onClick={() => window.electronAPI.minimize()}
+          className="min-h-9.5 pl-3.5 pr-3.5 pb-1 mb-2 p-1 hover:bg-slate-700 absolute right-8 top-0 text-gray-300 cursor-pointer"
+          onClick={() => minimize()}
         >
           -
         </button>
         <button
-          className="px-3 p-1 hover:bg-red-600  rounded-b text-gray-300 cursor-pointer"
-          onClick={() => window.electronAPI.close()}
+          className="min-h-9.5 pl-3 pr-3 pb-1 mb-2 hover:bg-red-600 absolute right-0 top-0 overflow-hidden   text-gray-300 cursor-pointer"
+          onClick={() =>  close()}
         >
           ×
         </button>

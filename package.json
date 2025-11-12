@@ -5,22 +5,24 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
     "build-frontend": "cd frontend && npm install && npm run build",
-    "dist": "npm run build-frontend && electron-builder"
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "author": "Zavsek",
   "license": "MIT",
   "description": "",
   "dependencies": {
+    "@tauri-apps/api": "^2.9.0",
+    "@tauri-apps/plugin-dialog": "^2.4.2",
+    "@tauri-apps/plugin-opener": "^2.5.2",
+    "@tauri-apps/plugin-shell": "^2.3.3",
     "dotenv": "^17.2.3",
-    "nodemon": "^3.1.10",
     "path": "^0.12.7",
     "tailwindcss": "^4.1.14"
   },
   "devDependencies": {
-    "electron": "^38.3.0",
-    "electron-builder": "^26.0.12"
+    "@tauri-apps/cli": "^2.9.4"
   },
   "build": {
     "appId": "com.filip.podgohelix",
