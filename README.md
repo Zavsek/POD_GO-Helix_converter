@@ -7,7 +7,7 @@ POD_GO-Helix_converter is a desktop application designed to convert patch/preset
 ### Key Features:
 -   **Fast Conversion:** Converts .pgp files to .hlx files almost instantly.
 -   **User-Friendly Interface:** Simple and intuitive design for easy navigation.
--   **Cross-Platform Compatibility:** Built with Electron for use on Windows, macOS, and Linux.
+-   **Cross-Platform Compatibility:** Built with Tauri 2.0 for use on Windows, macOS, and Linux.
 
 ## Usage Instructions
 
