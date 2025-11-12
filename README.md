@@ -9,6 +9,11 @@ POD_GO-Helix_converter is a desktop application designed to convert patch/preset
 -   **User-Friendly Interface:** Simple and intuitive design for easy navigation.
 -   **Cross-Platform Compatibility:** Built with Electron for use on Windows, macOS, and Linux.
 
+## Instalation 
+
+The app can be easily downloaded via the folowing [Download Link](https://drive.google.com/file/d/1tekepej_rmgufNh3zyAduzM2XGFBuv8n/view?usp=drive_link)
+The link will redirect you to Google Drive. to install the application launch the setup.exe file and follow the setup instructions. The entire app is only around 10MB so this process shouldn't take long   
+
 ## Usage Instructions
 
 1.  Open the POD_GO-Helix_converter application.
