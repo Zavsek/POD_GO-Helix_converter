@@ -1,9 +1,7 @@
-
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { PodGo } from "../interfaces/PodGoData";
-import { toast } from 'react-hot-toast';
-
+import { toast } from "react-hot-toast";
 
 export const handleSelectFile = async (
   setFilePath: React.Dispatch<React.SetStateAction<string | null>>,
@@ -19,10 +17,10 @@ export const handleSelectFile = async (
 
     setFilePath(izbranaDatoteka);
 
-    if (izbranaDatoteka.startsWith('/mock/')) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.pgp';
+    if (izbranaDatoteka.startsWith("/mock/")) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".pgp";
       input.onchange = (e) => {
         const fileInput = e.target as HTMLInputElement;
         const file = fileInput.files?.[0];
@@ -30,7 +28,7 @@ export const handleSelectFile = async (
           const reader = new FileReader();
           reader.onload = (event) => {
             const result = event.target!.result;
-            if (typeof result === 'string') {
+            if (typeof result === "string") {
               setFileContent(result);
               toast.success(`Selected File: ${file.name}`);
             } else {
@@ -53,11 +51,11 @@ export const handleSelectFile = async (
   }
 };
 
-
 export const handleConvert = async (
   filePath: string | null,
   fileContent: string | null,
-  convertToHlxLogic: (data: any) => any
+  convertToHlxLogic: (data: any) => any,
+  setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>
 ) => {
   if (!filePath && !fileContent) {
     toast.error("No File Selected!");
@@ -77,8 +75,24 @@ export const handleConvert = async (
     }
 
     const podGoData: PodGo = JSON.parse(contentToConvert);
-    const convertedData = convertToHlxLogic(podGoData);
+    const convertedData: PodGo = convertToHlxLogic(podGoData);
+    setTransformedFile(convertedData);
+    toast.success("Success");
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      toast.error(err.toString());
+    } else {
+      toast.error("An unknown error occurred");
+    }
+  }
+};
 
+export const handleSaveFile = async (convertedData: PodGo | null) => {
+  if (!convertedData) {
+    toast.error("No file to save");
+    return;
+  }
+  try {
     const savePath: string | null = await save({
       defaultPath: "output.hlx",
       filters: [{ name: "Helix Files", extensions: ["hlx"] }],

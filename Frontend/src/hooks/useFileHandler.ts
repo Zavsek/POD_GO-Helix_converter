@@ -1,24 +1,36 @@
 import { useState } from 'react';
-import { handleSelectFile, handleConvert } from '../utils/fileUtils'; 
+import { handleSelectFile, handleConvert, handleSaveFile } from '../utils/fileUtils'; 
+import { PodGo } from '../interfaces/PodGoData';
 
 export const useFileHandler = () => {
   const [filePath, setFilePath] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
+  const [transformedFile, setTransformedFile]= useState<PodGo | null>(null);
+
 
 
   const onSelectFile = () => {
+    setTransformedFile(null);
     handleSelectFile(setFilePath, setFileContent);
   };
 
 
   const onConvert = (convertToHlxLogic: (data: any) => any) => {
-    handleConvert(filePath, fileContent, convertToHlxLogic);
+    handleConvert(filePath, fileContent, convertToHlxLogic, setTransformedFile);
   };
 
+
+  const onSave = () =>{
+    handleSaveFile(transformedFile);
+  }
   return {
     filePath,
     fileContent,
+    transformedFile,
     onSelectFile,
     onConvert,
+    onSave
   };
 };
+
+

@@ -2,7 +2,6 @@ import isReverb from "./helpers/isReverb";
 import setMonoStereo from "./helpers/setMonoStereo";
 import trimModelName from "./helpers/trimModelName";
 import { appendDsp0, appendDsp1 } from "./helpers/appendEnd";
-import toast from "react-hot-toast";
 import { PodGo } from "../interfaces/PodGoData";
 import { DspObject } from "../types/DspObject";
 import { DspBlock } from "../interfaces/DspBlock";
@@ -97,8 +96,6 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
 
   appendDsp0(dsp0);
   appendDsp1(dsp1);
-
-  toast.success("Konverzija uspešna!");
   return { dsp0, dsp1 };
 }
 

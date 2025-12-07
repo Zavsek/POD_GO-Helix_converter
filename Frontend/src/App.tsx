@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 
 function App() {
 
-  const { filePath, fileContent, onSelectFile, onConvert } = useFileHandler();
+  const { filePath, fileContent, transformedFile, onSelectFile, onConvert, onSave } = useFileHandler();
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-800 to-gray-900 text-white">
@@ -35,9 +35,16 @@ function App() {
           
           <button
             onClick={() => onConvert(convertToHlxLogic)} 
-            className="animate-bg-shine bg-[linear-gradient(110deg,#4f46e5,45%,#a5b4fc,55%,#4f46e5)] bg-[length:200%_100%] border-[1px] text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer hover:scale-101"
+            className="animate-bg-shine bg-[linear-gradient(110deg,#4f46e5,45%,#a5b4fc,55%,#4f46e5)] bg-[length:200%_100%] border-[1px] text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all mt-1 duration-500 cursor-pointer hover:scale-101"
           >
             Convert to .hlx
+          </button>
+          <button
+            onClick={transformedFile ? onSave : undefined} 
+            className={transformedFile? "animate-bg-shine bg-[linear-gradient(110deg,#4f46e5,45%,#a5b4fc,55%,#4f46e5)] bg-[length:200%_100%] border-[1px] text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer, mt-10 hover:scale-101"
+              : "border bg-[linear-gradient(110deg,#4f46e5,55%,#4f46e5)]/60 border-gray-500 w-full text-white/80 font-semibold py-2 px-6 rounded-lg shadow-md transition-all cursor-pointer, mt-10 "}
+          >
+            Save file
           </button>
         </div>
       </main>
