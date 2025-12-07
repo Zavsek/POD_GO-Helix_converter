@@ -32,7 +32,8 @@ export function appendDsp0(dsp :DspObject) : void{
     }
     dsp.outputA = {
      "@model" : "HD2_AppDSPFlowOutput",
-     "@output" : 1,
+     //This one fucking line took me way to long to figure out  😑🔫
+     "@output" : 2,
      "gain" : 0.0,
      "pan" : 0.50
     }
