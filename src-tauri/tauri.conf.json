@@ -4,10 +4,10 @@
     "version": "0.1.0",
     "identifier": "me.zavsek.podgo-helix",
     "build": {
-      "frontendDist": "../Frontend/dist",
+      "frontendDist": "../frontend/dist",
       "devUrl": "http://localhost:5173",
-      "beforeDevCommand": "cd C:\\Users\\zavse\\Desktop\\Apps\\POD_GO-Helix_converter\\Frontend && npm run dev",
-      "beforeBuildCommand": "cd C:\\Users\\zavse\\Desktop\\Apps\\POD_GO-Helix_converter\\Frontend && npm run build"
+      "beforeDevCommand": "cd C:\\Users\\zavse\\Desktop\\Apps\\POD_GO-Helix_converter\\frontend && npm run dev",
+      "beforeBuildCommand": "cd C:\\Users\\zavse\\Desktop\\Apps\\POD_GO-Helix_converter\\frontend && npm run build"
     },
     "app": {
       "windows": [

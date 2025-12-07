@@ -1,4 +1,7 @@
-export function appendDsp0(dsp){
+import { DspBlock } from "../../interfaces/DspBlock"
+import { DspObject } from "../../types/DspObject"
+
+export function appendDsp0(dsp :DspObject) : void{
 
     delete dsp["input"]
     delete dsp["output"]
@@ -48,7 +51,7 @@ export function appendDsp0(dsp){
      "bypass" : false
     }
 }
-export function appendDsp1 (dsp1) {
+export function appendDsp1 (dsp1: DspObject): void {
     dsp1.inputA = {
      "@input" : 0,
      "@model" : "HD2_AppDSPFlow1Input",

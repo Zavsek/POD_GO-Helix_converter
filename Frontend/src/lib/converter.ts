@@ -3,10 +3,15 @@ import setMonoStereo from "./helpers/setMonoStereo";
 import trimModelName from "./helpers/trimModelName";
 import { appendDsp0, appendDsp1 } from "./helpers/appendEnd";
 import toast from "react-hot-toast";
+import { PodGo } from "../interfaces/PodGoData";
+import { DspObject } from "../types/DspObject";
+import { DspBlock } from "../interfaces/DspBlock";
 
-export function convertToHlxLogic(podGo) {
+
+export function convertToHlxLogic(podGo: PodGo) :  PodGo{
   const presetName = podGo.data?.meta?.name || "Untitled";
 
+  //set of hlx metadata taken from my own installment of helix native
   podGo.data.device = 2162944;
   podGo.data.device_version = 56623104;
   podGo.data.meta = {
@@ -21,26 +26,26 @@ export function convertToHlxLogic(podGo) {
     delete podGo.data.tone.controller;
   }
 
-  const { dsp0, dsp1 } = convertDsp(podGo.data.tone.dsp0);
+  const { dsp0 , dsp1 } = convertDsp(podGo.data.tone.dsp0);
   podGo.data.tone.dsp0 = dsp0;
   podGo.data.tone.dsp1 = dsp1;
 
   return podGo;
 }
 
-function convertDsp(dsp) {
-  const dsp0 = {};
-  const dsp1 = {};
+function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
+  const dsp0 : DspObject = {};
+  const dsp1 : DspObject= {};
 
   const sistemskiBloki = ["input", "output", "split", "join", "inputA", "inputB", "outputA", "outputB"];
 
   const vsiBloki = Object.entries(dsp)
-    .filter(([ime, blok]) =>
+    .filter(([ime, blok]: [string, DspBlock]) =>
       typeof blok === "object" &&
       blok !== null &&
       !sistemskiBloki.includes(ime.toLowerCase())
     )
-    .map(([ime, blok]) => {
+    .map(([ime, blok] : [string, DspBlock]) => {
       const model = (blok["@model"] || "").replace(/_STATIC_/gi, "");
       return {
         key: ime,
@@ -48,7 +53,7 @@ function convertDsp(dsp) {
         blok: { ...blok, "@model": trimModelName(model) },
       };
     })
-    // 🔹 DODANO: izloči bloke brez modela
+    // remove blocks without models
     .filter(({ model }) => model.trim() !== "");
 
   vsiBloki.sort((a, b) => {
@@ -60,12 +65,12 @@ function convertDsp(dsp) {
   vsiBloki.forEach(({ blok }, index) => {
     const model = blok["@model"] || "";
 
-    // preskoči fxloop
+    // skip FxLoop
     if (model.toLowerCase().includes("fxloop")) {
       return;
     }
 
-    // Stereo/Mono logika
+    // Stereo/Mono logic
     if (isReverb(model)) {
       const stereoReverbs = [
         "DynamicHall", "DynamicPlate", "DynamicRoom", "DynamicAmbiance",
@@ -75,7 +80,7 @@ function convertDsp(dsp) {
       const isStereo = stereoReverbs.some(r => model.toLowerCase().includes(r.toLowerCase()));
       blok["@stereo"] = isStereo;
     } else {
-      const stereoValue = setMonoStereo(model);
+      const stereoValue = setMonoStereo(model) ;
       blok["@stereo"] = stereoValue !== null ? stereoValue : false;
     }
 

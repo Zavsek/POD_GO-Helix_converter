@@ -7,10 +7,11 @@ import toast from "react-hot-toast";
 
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import { PodGo } from "./interfaces/PodGoData";
 
 function App() {
-  const [filePath, setFilePath] = useState(null);
-  const [fileContent, setFileContent] = useState(null);
+  const [filePath, setFilePath] = useState<string|null>(null);
+  const [fileContent, setFileContent] = useState<string|null>(null);
 
   const handleSelectFile = async () => {
     try {
@@ -28,14 +29,23 @@ function App() {
         input.type = 'file';
         input.accept = '.pgp';
         input.onchange = (e) => {
-          const file = e.target.files[0];
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            setFileContent(event.target.result);
+          const fileInput = e.target as HTMLInputElement;
+          const file = fileInput.files?.[0];
+          if(file){
+            const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target!.result;
+          if(typeof result === 'string'){
+            setFileContent(result)
             toast.success(`Selected File: ${file.name}`);
-          };
-          reader.readAsText(file);
-        };
+          }
+          else toast.error("File content is not a valid string")
+       };
+      reader.readAsText(file);
+
+          }
+          else toast.error("No file selected")
+     }
         input.click();
       } else {
 
@@ -48,50 +58,53 @@ function App() {
     }
   };
 
-  const handleConvert = async () => {
-    if (!filePath && !fileContent) {
-      toast.error("No File Selected!");
+const handleConvert = async () => {
+  if (!filePath && !fileContent) {
+    toast.error("No File Selected!");
+    return;
+  }
+
+  try {
+    let contentToConvert = fileContent;
+
+    if (!contentToConvert && filePath) {
+      contentToConvert = await readTextFile(filePath);
+    }
+
+    if (!contentToConvert) {
+      toast.error("No Content To Convert!");
       return;
     }
 
-    try {
-      let contentToConvert = fileContent;
-      
-      if (!contentToConvert && filePath) {
-        contentToConvert = await readTextFile(filePath);
-      }
+    const podGoData: PodGo = JSON.parse(contentToConvert);
+    const convertedData = convertToHlxLogic(podGoData);
 
-      if (!contentToConvert) {
-        toast.error("No Content To Convert!");
-        return;
-      }
+    const savePath: string | null = await save({
+      defaultPath: "output.hlx",
+      filters: [{ name: "Helix Files", extensions: ["hlx"] }],
+    });
 
-      const podGoData = JSON.parse(contentToConvert);
-      const convertedData = convertToHlxLogic(podGoData);
+    if (!savePath) return;
 
+    // Using writeTextFile correctly with Tauri 2.0
+    await writeTextFile(savePath, JSON.stringify(convertedData, null, 2));
 
-
-      const savePath = await save({
-        defaultPath: "output.hlx",
-        filters: [{ name: "Helix Files", extensions: ["hlx"] }],
-      });
-
-      if (!savePath) return; 
-
-      await writeTextFile({ path: savePath, contents: JSON.stringify(convertedData, null, 2) });
-
-      toast.success(`File Saved Succesfully: ${savePath}`);
-    } catch (err) {
+    toast.success(`File Saved Successfully: ${savePath}`);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
       toast.error(err.toString());
+    } else {
+      toast.error("An unknown error occurred");
     }
-  };
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-800 to-gray-900 text-white">
       <TitleBar />
 
       <header className="w-full bg-slate-700/80 backdrop-blur-md py-4 text-center text-3xl font-semibold rounded-b-xl font-primary  shadow-2xl">
-        POD GO TO HELIX CONVERTER
+        POD GO TO HELIX CONVERTER!
       </header>
 
       <main className="flex flex-col items-center justify-center flex-grow text-center px-4">

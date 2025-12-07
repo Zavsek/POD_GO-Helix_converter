@@ -1,4 +1,4 @@
-export default function isReverb(model) {
+export default function isReverb(model: string) : boolean {
   const stereoReverbs = [
     "DynamicHall", "DynamicPlate", "DynamicRoom",
     "dynamicAmbiance", "Shimmer", "HotSprings",
