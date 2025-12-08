@@ -1,11 +1,20 @@
 import React from 'react'
-import { useFileHandler } from '../hooks/dist/useFileHandler';
-const PresetEditor = ()=> {
-    const {transformedFile,onShowModelBuilder,  } = useFileHandler();
+import { useFileHandler } from '../hooks/useFileHandler';
+import Header from '../components/Header';
+import { PodGo } from '../interfaces/PodGoData';
+
+interface Props{
+  transformedFile: PodGo |null;
+  onShowModelBuilder: () => void;
+}
+
+
+const PresetEditor: React.FC<Props> = ({transformedFile, onShowModelBuilder})=> {
   return (
-    <div>
+    <>
+      <Header title={'PRESET BUILDER'}/>
       <button onClick={onShowModelBuilder}>back </button>
-      </div>
+      </>
   );
 }
 

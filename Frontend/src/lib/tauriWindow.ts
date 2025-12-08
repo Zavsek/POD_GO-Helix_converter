@@ -11,7 +11,7 @@ export function close() {
 
 export const mainWindowResize= async() =>{
   const window = getCurrentWindow();
-  await window.setSize(new LogicalSize(500, 650))
+   await window.setSize(new LogicalSize(500, 650))
 }
 
 export const modelWindowResize= async() =>{
