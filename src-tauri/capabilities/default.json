@@ -12,6 +12,8 @@
     "fs:allow-read-file",
     "fs:allow-write-file",
     "dialog:default",
+    "core:window:allow-set-size",
+
     {
       "identifier": "fs:scope",
       "allow": [
