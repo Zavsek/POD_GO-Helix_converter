@@ -57,7 +57,7 @@ export const handleConvert = async (
   fileContent: string | null,
   convertToHlxLogic: (data: any) => any,
   setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>,
-   setModels: React.Dispatch<React.SetStateAction<{ block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>>
+   setModels: React.Dispatch<React.SetStateAction<{id: string, block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>>
 ) => {
   if (!filePath && !fileContent) {
     toast.error("No File Selected!");
@@ -83,12 +83,14 @@ export const handleConvert = async (
    const dsp0Blocks = convertedData.data.tone.dsp0 ?? {};
 const dsp1Blocks = convertedData.data.tone.dsp1 ?? {};
 
-const allBlocks: { block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] = [
+const allBlocks: {id:string, block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] = [
   ...Object.entries(dsp0Blocks).map(([key, block]) => ({
+    id: `dsp0-${key}` ,
     block,
     dsp: 'dsp0' as const,
   })),
   ...Object.entries(dsp1Blocks).map(([key, block]) => ({
+    id: `dsp1-${key}` ,
     block,
     dsp: 'dsp1' as const,
   }))
@@ -97,9 +99,8 @@ const allBlocks: { block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] = [
   return !modelName.startsWith("HD2_AppDSPFlow");
 });
 
-// Nastavi stanje s to popravljeno strukturo
+
 setModels(allBlocks);
-    setModels(allBlocks);
     toast.success("Success");
   } catch (err: unknown) {
     if (err instanceof Error) {

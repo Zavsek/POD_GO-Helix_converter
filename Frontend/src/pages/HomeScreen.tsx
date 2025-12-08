@@ -16,7 +16,7 @@ interface Props{
 const HomeScreen: React.FC<Props> = ({filePath, transformedFile, onShowModelBuilder, onSelectFile, onConvert, onSave}) => {
   return (
     <>
-          <Header title={"POD GO TO HELIX CONVERTER"} />
+          <Header title={"POD GO TO HELIX CONVERTER"} onShowModelBuilder={onShowModelBuilder} showModelBuilder={false}/>
           <main className="flex flex-col items-center justify-center flex-grow text-center px-4 mb-25">
             <div className="bg-slate-700/10 backdrop-blur-md p-10 shadow-2xl w-full max-w-lg min-h-[300px] flex flex-col justify-center gap-4">
               <input

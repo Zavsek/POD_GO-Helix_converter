@@ -9,7 +9,7 @@ export const useFileHandler = () => {
   const [filePath, setFilePath] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [transformedFile, setTransformedFile]= useState<PodGo | null>(null);
-  const [models, setModels] = useState<{ block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>(null);
+  const [models, setModels] = useState<{id:string,  block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>(null);
     const[showModelBuilder, setShowModelBuilder] = useState<boolean>(false)
 
 

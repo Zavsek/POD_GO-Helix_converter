@@ -16,5 +16,5 @@ export const mainWindowResize= async() =>{
 
 export const modelWindowResize= async() =>{
   const window = getCurrentWindow();
-  await window.setSize(new LogicalSize(1000, 500))
+  await window.setSize(new LogicalSize(1300, 500))
 }
