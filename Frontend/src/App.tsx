@@ -46,19 +46,6 @@ function App() {
           >
             Save file
           </button>
-          { models && models.length > 0 ? (
-            <div>
-              {models.map((block, index) => (
-                <div key={index}>
-                  <p>Model: {block["@model"]}</p>
-                  <p>Position: {block["@position"]}</p>
-                  <p>Stereo: {block["@stereo"] ? "Yes" : "No"}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No models available</p>
-          )}
         </div>
       </main>
 
