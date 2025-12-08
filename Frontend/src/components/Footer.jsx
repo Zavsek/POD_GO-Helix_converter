@@ -12,7 +12,7 @@ export const openAnUrl = async (url) => {
 
 const Footer = () => {
   return (
-    <footer className="text-center py-4 text-sm text-gray-400/70">
+    <footer className="text-center py-4 text-sm font-primary text-gray-400/70">
         {new Date().getFullYear()} POD GO to Helix Converter by Filip Zavšek
         <div 
           className="mt-2 cursor-pointer" 

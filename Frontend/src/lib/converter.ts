@@ -38,30 +38,30 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
 
   const sistemskiBloki = ["input", "output", "split", "join", "inputA", "inputB", "outputA", "outputB"];
 
-  const vsiBloki = Object.entries(dsp)
-    .filter(([ime, blok]: [string, DspBlock]) =>
-      typeof blok === "object" &&
-      blok !== null &&
-      !sistemskiBloki.includes(ime.toLowerCase())
+  const allBlocks = Object.entries(dsp)
+    .filter(([name, block]: [string, DspBlock]) =>
+      typeof block === "object" &&
+      block !== null &&
+      !sistemskiBloki.includes(name.toLowerCase())
     )
-    .map(([ime, blok] : [string, DspBlock]) => {
-      const model = (blok["@model"] || "").replace(/_STATIC_/gi, "");
+    .map(([name, block] : [string, DspBlock]) => {
+      const model = (block["@model"] || "").replace(/_STATIC_/gi, "");
       return {
-        key: ime,
+        key: name,
         model: trimModelName(model),
-        blok: { ...blok, "@model": trimModelName(model) },
+        blok: { ...block, "@model": trimModelName(model) },
       };
     })
     // remove blocks without models
     .filter(({ model }) => model.trim() !== "");
 
-  vsiBloki.sort((a, b) => {
+  allBlocks.sort((a, b) => {
     const posA = a.blok["@position"] ?? 0;
     const posB = b.blok["@position"] ?? 0;
     return posA - posB;
   });
 
-  vsiBloki.forEach(({ blok }, index) => {
+  allBlocks.forEach(({ blok }, index) => {
     const model = blok["@model"] || "";
 
     // skip FxLoop
@@ -93,7 +93,6 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
       dsp1[`block${index - 8}`] = blok;
     }
   });
-
   appendDsp0(dsp0);
   appendDsp1(dsp1);
   return { dsp0, dsp1 };

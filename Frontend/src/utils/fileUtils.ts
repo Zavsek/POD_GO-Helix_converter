@@ -2,6 +2,7 @@ import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { PodGo } from "../interfaces/PodGoData";
 import { toast } from "react-hot-toast";
+import { DspBlock } from "../interfaces/DspBlock";
 
 export const handleSelectFile = async (
   setFilePath: React.Dispatch<React.SetStateAction<string | null>>,
@@ -55,7 +56,8 @@ export const handleConvert = async (
   filePath: string | null,
   fileContent: string | null,
   convertToHlxLogic: (data: any) => any,
-  setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>
+  setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>,
+   setModels: React.Dispatch<React.SetStateAction<DspBlock[] | null>>
 ) => {
   if (!filePath && !fileContent) {
     toast.error("No File Selected!");
@@ -77,6 +79,13 @@ export const handleConvert = async (
     const podGoData: PodGo = JSON.parse(contentToConvert);
     const convertedData: PodGo = convertToHlxLogic(podGoData);
     setTransformedFile(convertedData);
+     const dsp0Blocks = convertedData.data.tone.dsp0 ?? {}; 
+    const dsp1Blocks = convertedData.data.tone.dsp1 ?? {};  
+    const allBlocks: DspBlock[] = [
+      ...Object.values(dsp0Blocks),
+      ...Object.values(dsp1Blocks)
+    ];
+    setModels(allBlocks);
     toast.success("Success");
   } catch (err: unknown) {
     if (err instanceof Error) {
