@@ -84,6 +84,7 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
     else if(legacyDelay){
 
     }
+    //for some reason this is the way it is
     else if (model.includes("HD2_EQ_STATIC_CaliQStereo")){
         model = "HD2_CaliQ";
         blok["@stereo"] = false;

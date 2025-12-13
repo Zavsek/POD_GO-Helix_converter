@@ -49,7 +49,7 @@ const HomeScreen: React.FC<Props> = ({filePath, transformedFile, onShowModelBuil
 
               <button
                 onClick={transformedFile ? onSave : undefined}
-                className={transformedFile ? "animate-bg-shine bg-[linear-gradient(110deg,#4f46e5,45%,#a5b4fc,55%,#4f46e5)] bg-[length:200%_100%] border-[1px] text-white font-primary py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer hover:scale-101" : "border bg-[linear-gradient(110deg,#4f46e5,55%,#4f46e5)]/60 border-gray-500 w-full text-white/80 font-primary py-2 px-6 rounded-lg shadow-md transition-all cursor-pointer "}
+                className={transformedFile ? "animate-bg-shine bg-[linear-gradient(110deg,#CEE407,45%,#E8F858,55%,#CEE407)] bg-[length:200%_100%] border-[1px] text-white font-primary py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer hover:scale-101" : "border bg-[linear-gradient(110deg,#4f46e5,55%,#4f46e5)]/60 border-gray-500 w-full text-white/80 font-primary py-2 px-6 rounded-lg shadow-md transition-all cursor-pointer "}
               >
                 Save file
               </button>

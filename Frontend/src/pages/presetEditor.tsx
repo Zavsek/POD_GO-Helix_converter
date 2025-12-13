@@ -9,13 +9,20 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  DropAnimation,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   horizontalListSortingStrategy,
+  arrayMove,
+  useSortable,
 } from "@dnd-kit/sortable";
-import SortableBlock from "../components/sortableBlock";
+import { CSS } from "@dnd-kit/utilities";
 
+// --- Interfaces ---
 interface ModelItem {
   id: string;
   block: DspBlock;
@@ -38,112 +45,242 @@ function makeRowFromModels(modelsForDsp: ModelItem[]) {
   return row;
 }
 
+// --- Komponenta za posamezen blok ---
+interface SortableBlockProps {
+  id: string;
+  item: ModelItem | null;
+  active?: boolean; // Ali je to overlay (aktivni element)
+}
+
+const SortableBlockItem: React.FC<SortableBlockProps> = ({ id, item, active }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id, disabled: !item });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+  };
+
+  // 1. Prazno mesto (Slot)
+  if (!item) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        // Uporabimo w-full in h-full, da zapolnimo celico grida
+        className="w-full h-24 border border-dashed border-gray-700 rounded-lg flex items-center justify-center bg-gray-800/20 text-gray-600 text-[10px] select-none"
+      >
+        Empty
+      </div>
+    );
+  }
+
+  // 2. Poln blok (Model)
+  // Če je "active" (overlay), mu damo malo drugačen stil (senca, brez opacity)
+  const baseClasses = "w-full h-24 rounded-lg flex flex-col items-center justify-center p-2 cursor-grab select-none overflow-hidden text-center transition-colors";
+  const colorClasses = active 
+    ? "bg-slate-600 border-2 border-blue-400 shadow-xl z-50 cursor-grabbing" 
+    : "bg-slate-700 border border-slate-600 hover:bg-slate-600 hover:border-slate-500 shadow-sm active:cursor-grabbing";
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={active ? undefined : style} // Overlay ne rabi transformacije, ker sledi miški
+      {...attributes}
+      {...listeners}
+      className={`${baseClasses} ${colorClasses}`}
+    >
+      {/* Prikaz imena modela - centrirano in zlomljeno v vrstice */}
+      <span className="text-white text-xs font-medium break-words leading-tight w-full pointer-events-none px-1">
+        {item.block["@model"] || "Unknown Block"}
+      </span>
+      
+      {/* Opcijsko: ID za debug, če želiš, sicer lahko to odstraniš */}
+      {/* <span className="text-[9px] text-gray-400 mt-1">{item.id}</span> */}
+    </div>
+  );
+};
+
+// --- Glavna komponenta ---
 const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, models }) => {
-  if (!models) return <p>Loading…</p>;
-
-  const dsp0Models = useMemo(() => models.filter((m) => m.dsp === "dsp0"), [models]);
-  const dsp1Models = useMemo(() => models.filter((m) => m.dsp === "dsp1"), [models]);
-
-  const [rows, setRows] = useState<{
+  
+  const [items, setItems] = useState<{
     dsp0: (ModelItem | null)[];
     dsp1: (ModelItem | null)[];
-  }>(() => ({
-    dsp0: makeRowFromModels(dsp0Models),
-    dsp1: makeRowFromModels(dsp1Models),
-  }));
+  }>({ dsp0: [], dsp1: [] });
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  function findLocationById(id: string) {
-    const rowKey = rows.dsp0.findIndex((it) => it?.id === id) !== -1
-      ? "dsp0"
-      : rows.dsp1.findIndex((it) => it?.id === id) !== -1
-      ? "dsp1"
-      : null;
-    if (!rowKey) return null;
-    const index = rows[rowKey].findIndex((it) => it?.id === id);
-    return { rowKey: rowKey as "dsp0" | "dsp1", index };
-  }
+  useMemo(() => {
+    if (models) {
+      const dsp0Models = models.filter((m) => m.dsp === "dsp0");
+      const dsp1Models = models.filter((m) => m.dsp === "dsp1");
+      setItems({
+        dsp0: makeRowFromModels(dsp0Models),
+        dsp1: makeRowFromModels(dsp1Models),
+      });
+    }
+  }, [models]);
 
-  function handleDragEnd(event: DragEndEvent) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  if (!models) return <div className="text-white p-4">Loading models...</div>;
+
+  const getSlotId = (rowKey: string, index: number, item: ModelItem | null) => {
+    return item ? item.id : `empty-${rowKey}-${index}`;
+  };
+
+  const findContainer = (id: string) => {
+    if (items.dsp0.some((it, idx) => getSlotId("dsp0", idx, it) === id)) return "dsp0";
+    if (items.dsp1.some((it, idx) => getSlotId("dsp1", idx, it) === id)) return "dsp1";
+    return null;
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!active || !over) return;
+    const activeIdStr = String(active.id);
+    setActiveId(null);
 
-    const activeId = String(active.id);
-    const overId = String(over.id);
+    if (!over) return;
 
-    const src = findLocationById(activeId);
-    const trg = findLocationById(overId);
+    const overIdStr = String(over.id);
+    const activeContainer = findContainer(activeIdStr);
+    const overContainer = findContainer(overIdStr);
 
-    if (!src || !trg) return;
+    if (!activeContainer || !overContainer) return;
 
-    // Omejitev: elementi se lahko premikajo samo znotraj iste vrstice
-    if (src.rowKey !== trg.rowKey) return;
+    const activeIndex = items[activeContainer as "dsp0" | "dsp1"].findIndex(
+      (it, idx) => getSlotId(activeContainer, idx, it) === activeIdStr
+    );
+    const overIndex = items[overContainer as "dsp0" | "dsp1"].findIndex(
+      (it, idx) => getSlotId(overContainer, idx, it) === overIdStr
+    );
 
-    setRows((prev) => {
-      const newRow = [...prev[src.rowKey]];
-      const [moved] = newRow.splice(src.index, 1);
-      newRow.splice(trg.index, 0, moved);
+    if (activeIndex === -1 || overIndex === -1) return;
 
-      // Zagotovi dolžino ROW_LENGTH
-      const normalized = newRow.slice(0, ROW_LENGTH);
-      while (normalized.length < ROW_LENGTH) normalized.push(null);
+    setItems((prev) => {
+      const sourceRow = [...prev[activeContainer as "dsp0" | "dsp1"]];
+      const targetRow = activeContainer === overContainer 
+        ? sourceRow 
+        : [...prev[overContainer as "dsp0" | "dsp1"]];
 
-      return { ...prev, [src.rowKey]: normalized };
+      const itemToMove = sourceRow[activeIndex];
+
+      if (activeContainer === overContainer) {
+        const newRow = arrayMove(prev[activeContainer as "dsp0" | "dsp1"], activeIndex, overIndex);
+        return { ...prev, [activeContainer]: newRow };
+      } else {
+        sourceRow.splice(activeIndex, 1);
+        targetRow.splice(overIndex, 0, itemToMove);
+        
+        while (sourceRow.length < ROW_LENGTH) sourceRow.push(null);
+        const normalizedTarget = targetRow.slice(0, ROW_LENGTH);
+
+        return {
+          ...prev,
+          [activeContainer]: sourceRow,
+          [overContainer]: normalizedTarget,
+        };
+      }
     });
-  }
+  };
 
-  const renderRow = (row: (ModelItem | null)[], rowKey: "dsp0" | "dsp1") => {
-    const draggableIds = row.filter(Boolean).map((it) => it!.id);
+  const dropAnimation: DropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: {
+        active: { opacity: '0.4' },
+      },
+    }),
+  };
+
+  const renderRow = (rowKey: "dsp0" | "dsp1") => {
+    const rowData = items[rowKey];
+    const dndIds = rowData.map((it, idx) => getSlotId(rowKey, idx, it));
 
     return (
-      <div key={rowKey}>
-        <h2 className="mb-2">{rowKey.toUpperCase()}</h2>
-        <SortableContext items={draggableIds} strategy={horizontalListSortingStrategy}>
-          <div className="flex gap-2">
-            {row.map((cell, idx) => {
-              if (!cell) {
-                return (
-                  <div
-                    key={`empty-${rowKey}-${idx}`}
-                    style={{
-                      width: 100,
-                      height: 80,
-                      textWrap:"wrap",
-                      border: "1px dashed #444",
-                      borderRadius: 8,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "rgba(255,255,255,0.02)",
-                      color: "#777",
-                    }}
-                  >
-                    <span style={{ fontSize: 12 }}>empty</span>
-                  </div>
-                );
-              }
-
-              return <SortableBlock key={cell.id} id={cell.id} item={cell} />;
-            })}
-          </div>
-        </SortableContext>
+      <div className="w-full mb-6">
+        <h2 className="mb-2 text-gray-400 font-bold text-xs uppercase tracking-wider pl-1">
+            {rowKey.toUpperCase()} CHAIN
+        </h2>
+        <div className="bg-gray-900 p-3 rounded-xl border border-gray-800 shadow-inner">
+            <SortableContext items={dndIds} strategy={horizontalListSortingStrategy}>
+            {/* KLJUČNA SPREMEMBA: 
+                Grid sistem namesto Flex. 
+                'grid-cols-8' zagotovi, da je točno 8 stolpcev, ki se razdelijo po širini.
+            */}
+            <div className="grid grid-cols-8 gap-2 w-full">
+                {rowData.map((item, idx) => (
+                <SortableBlockItem
+                    key={getSlotId(rowKey, idx, item)}
+                    id={getSlotId(rowKey, idx, item)}
+                    item={item}
+                />
+                ))}
+            </div>
+            </SortableContext>
+        </div>
       </div>
     );
   };
 
+  const activeItem = activeId 
+    ? [...items.dsp0, ...items.dsp1].find(i => i?.id === activeId) 
+    : null;
+
   return (
-    <>
+    // Uporabil sem 'flex flex-col h-screen' da zagotovim, da aplikacija zapolni okno brez overflow-a na body
+    <div className="flex flex-col h-screen bg-gray-950 text-white overflow-hidden">
       <Header title={"PRESET BUILDER"} onShowModelBuilder={onShowModelBuilder} showModelBuilder={true} />
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className="space-y-6 p-4">
-          {renderRow(rows.dsp0, "dsp0")}
-          {renderRow(rows.dsp1, "dsp1")}
+      
+      {/* Scrollable area only for content if needed, but normally grid fits */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-full mx-auto">
+            <DndContext 
+                sensors={sensors} 
+                collisionDetection={closestCenter} 
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+            >
+            <div className="flex flex-col space-y-2">
+                {renderRow("dsp0")}
+                {renderRow("dsp1")}
+            </div>
+
+            <DragOverlay dropAnimation={dropAnimation}>
+                {activeId && activeItem ? (
+                    // Prilagodimo širino overlay elementa, da izgleda podobno kot v gridu
+                    <div style={{ width: '140px' }}> 
+                        <SortableBlockItem 
+                            id={activeId} 
+                            item={activeItem} 
+                            active={true} 
+                        />
+                    </div>
+                ) : null}
+            </DragOverlay>
+
+            </DndContext>
         </div>
-      </DndContext>
-      <div className="p-4">
       </div>
-    </>
+      <button
+                className={transformedFile ? " absolute right-6 bottom-25 animate-bg-shine bg-[linear-gradient(110deg,#CEE407,45%,#E8F858,55%,#CEE407)] bg-[length:200%_100%] border-[1px] text-white font-primary py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer min-w-40 min-h-20 hover:scale-101" : "border bg-[linear-gradient(110deg,#4f46e5,55%,#4f46e5)]/60 border-gray-500 w-full text-white/80 font-primary py-2 px-6 rounded-lg shadow-md transition-all cursor-pointer "}
+              >
+                Save file
+              </button>
+    </div>
   );
 };
 
