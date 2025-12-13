@@ -21,8 +21,9 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import mapColorsForBlocks from "../lib/helpers/mapColorsForBlocks";
 
-// --- Interfaces ---
+
 interface ModelItem {
   id: string;
   block: DspBlock;
@@ -45,11 +46,11 @@ function makeRowFromModels(modelsForDsp: ModelItem[]) {
   return row;
 }
 
-// --- Komponenta za posamezen blok ---
+
 interface SortableBlockProps {
   id: string;
   item: ModelItem | null;
-  active?: boolean; // Ali je to overlay (aktivni element)
+  active?: boolean; 
 }
 
 const SortableBlockItem: React.FC<SortableBlockProps> = ({ id, item, active }) => {
@@ -68,47 +69,51 @@ const SortableBlockItem: React.FC<SortableBlockProps> = ({ id, item, active }) =
     opacity: isDragging ? 0.3 : 1,
   };
 
-  // 1. Prazno mesto (Slot)
+  
   if (!item) {
     return (
       <div
         ref={setNodeRef}
         style={style}
-        // Uporabimo w-full in h-full, da zapolnimo celico grida
+  
         className="w-full h-24 border border-dashed border-gray-700 rounded-lg flex items-center justify-center bg-gray-800/20 text-gray-600 text-[10px] select-none"
       >
         Empty
       </div>
     );
   }
+  const blockColor = mapColorsForBlocks(item.block["@model"] || "");
+  
+  const dynamicStyle = {
+    backgroundColor: blockColor,
+    
+    ...(active ? {} : style),
+  };
+  // ----------------------------------------------------
 
-  // 2. Poln blok (Model)
-  // Če je "active" (overlay), mu damo malo drugačen stil (senca, brez opacity)
-  const baseClasses = "w-full h-24 rounded-lg flex flex-col items-center justify-center p-2 cursor-grab select-none overflow-hidden text-center transition-colors";
+
+  const baseClasses = "w-full h-24 rounded-lg flex flex-col items-center justify-center p-2 cursor-grab select-none overflow-hidden text-center transition-all duration-100 ease-out";
   const colorClasses = active 
-    ? "bg-slate-600 border-2 border-blue-400 shadow-xl z-50 cursor-grabbing" 
-    : "bg-slate-700 border border-slate-600 hover:bg-slate-600 hover:border-slate-500 shadow-sm active:cursor-grabbing";
+    ? "border-2 border-blue-400 shadow-xl z-50 cursor-grabbing" 
+    : "border border-slate-600 hover:scale-[1.03] hover:border-slate-500 shadow-sm active:cursor-grabbing";
 
   return (
     <div
       ref={setNodeRef}
-      style={active ? undefined : style} // Overlay ne rabi transformacije, ker sledi miški
+      style={dynamicStyle}
       {...attributes}
       {...listeners}
       className={`${baseClasses} ${colorClasses}`}
     >
-      {/* Prikaz imena modela - centrirano in zlomljeno v vrstice */}
+
       <span className="text-white text-xs font-medium break-words leading-tight w-full pointer-events-none px-1">
         {item.block["@model"] || "Unknown Block"}
       </span>
-      
-      {/* Opcijsko: ID za debug, če želiš, sicer lahko to odstraniš */}
-      {/* <span className="text-[9px] text-gray-400 mt-1">{item.id}</span> */}
+
     </div>
   );
 };
 
-// --- Glavna komponenta ---
 const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, models }) => {
   
   const [items, setItems] = useState<{
@@ -217,10 +222,7 @@ const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, mo
         </h2>
         <div className="bg-gray-900 p-3 rounded-xl border border-gray-800 shadow-inner">
             <SortableContext items={dndIds} strategy={horizontalListSortingStrategy}>
-            {/* KLJUČNA SPREMEMBA: 
-                Grid sistem namesto Flex. 
-                'grid-cols-8' zagotovi, da je točno 8 stolpcev, ki se razdelijo po širini.
-            */}
+
             <div className="grid grid-cols-8 gap-2 w-full">
                 {rowData.map((item, idx) => (
                 <SortableBlockItem
@@ -241,11 +243,11 @@ const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, mo
     : null;
 
   return (
-    // Uporabil sem 'flex flex-col h-screen' da zagotovim, da aplikacija zapolni okno brez overflow-a na body
+
     <div className="flex flex-col h-screen bg-gray-950 text-white overflow-hidden">
       <Header title={"PRESET BUILDER"} onShowModelBuilder={onShowModelBuilder} showModelBuilder={true} />
       
-      {/* Scrollable area only for content if needed, but normally grid fits */}
+
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-full mx-auto">
             <DndContext 
@@ -261,7 +263,7 @@ const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, mo
 
             <DragOverlay dropAnimation={dropAnimation}>
                 {activeId && activeItem ? (
-                    // Prilagodimo širino overlay elementa, da izgleda podobno kot v gridu
+
                     <div style={{ width: '140px' }}> 
                         <SortableBlockItem 
                             id={activeId} 
@@ -278,7 +280,7 @@ const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, mo
       <button
                 className={transformedFile ? " absolute right-6 bottom-25 animate-bg-shine bg-[linear-gradient(110deg,#CEE407,45%,#E8F858,55%,#CEE407)] bg-[length:200%_100%] border-[1px] text-white font-primary py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer min-w-40 min-h-20 hover:scale-101" : "border bg-[linear-gradient(110deg,#4f46e5,55%,#4f46e5)]/60 border-gray-500 w-full text-white/80 font-primary py-2 px-6 rounded-lg shadow-md transition-all cursor-pointer "}
               >
-                Save file
+                Save layout in file
               </button>
     </div>
   );
