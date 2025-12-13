@@ -35,4 +35,5 @@ Converting a .pgp file named "MyAwesomeTone.pgp":
 ## Limitations
 
 The converter is a simple mockup and may have issues with presets containing certain effects or specific configurations.
+It is unclear if this works with effects and amps in newer pod go version as i didn't have a chance to check
 >

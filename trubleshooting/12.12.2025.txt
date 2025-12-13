@@ -1,0 +1,3 @@
+fixes needed:
+-legacy delays need to be fixed(wrong mapping of stereo) specifaically tested on analog delay.
+-EQcaliQ wrong name should not start with EQ;

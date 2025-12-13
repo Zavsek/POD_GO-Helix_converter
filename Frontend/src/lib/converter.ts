@@ -5,6 +5,7 @@ import { appendDsp0, appendDsp1 } from "./helpers/appendEnd";
 import { PodGo } from "../interfaces/PodGoData";
 import { DspObject } from "../types/DspObject";
 import { DspBlock } from "../interfaces/DspBlock";
+import isDelay from "./helpers/isDelay";
 
 
 export function convertToHlxLogic(podGo: PodGo) :  PodGo{
@@ -46,10 +47,11 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
     )
     .map(([name, block] : [string, DspBlock]) => {
       const model = (block["@model"] || "").replace(/_STATIC_/gi, "");
+      const [legacyDelay, delayRetainsStereo]: [boolean, boolean] = isDelay(model);
       return {
         key: name,
-        model: trimModelName(model),
-        blok: { ...block, "@model": trimModelName(model) },
+        model: trimModelName(model, delayRetainsStereo),
+        blok: { ...block, "@model": trimModelName(model, delayRetainsStereo) },
       };
     })
     // remove blocks without models
@@ -62,13 +64,13 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
   });
 
   allBlocks.forEach(({ blok }, index) => {
-    const model = blok["@model"] || "";
+    let model = blok["@model"] || "";
 
     // skip FxLoop
     if (model.toLowerCase().includes("fxloop")) {
       return;
     }
-
+    const[legacyDelay, delayRetainsStereo] : [boolean, boolean] = isDelay(model );
     // Stereo/Mono logic
     if (isReverb(model)) {
       const stereoReverbs = [
@@ -78,10 +80,19 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
       ];
       const isStereo = stereoReverbs.some(r => model.toLowerCase().includes(r.toLowerCase()));
       blok["@stereo"] = isStereo;
-    } else {
+    }
+    else if(legacyDelay){
+
+    }
+    else if (model.includes("HD2_EQ_STATIC_CaliQStereo")){
+        model = "HD2_CaliQ";
+        blok["@stereo"] = false;
+    }
+     else {
       const stereoValue = setMonoStereo(model) ;
       blok["@stereo"] = stereoValue !== null ? stereoValue : false;
     }
+
 
     if (index < 8) {
       blok["@path"] = 0;
