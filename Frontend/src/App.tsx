@@ -18,6 +18,8 @@ function App() {
     onSelectFile,
     onConvert,
     onSave,
+    onRearangeModels,
+    setRearangedModels
   } = useFileHandler();
 
   return (
@@ -40,6 +42,8 @@ function App() {
           transformedFile={transformedFile}
           onShowModelBuilder={onShowModelBuilder}
           models={models}
+          onRearangeModels={onRearangeModels}
+          setRearangedModels = {setRearangedModels}
         />
       )}
       <Footer />

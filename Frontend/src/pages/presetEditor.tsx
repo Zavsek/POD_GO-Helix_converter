@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import Header from "../components/Header";
 import { PodGo } from "../interfaces/PodGoData";
-import { DspBlock } from "../interfaces/DspBlock";
 import {
   DndContext,
   closestCenter,
@@ -22,18 +21,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import mapColorsForBlocks from "../lib/helpers/mapColorsForBlocks";
+import ModelItem from "../interfaces/ModelItem";
+import getAllBlocksMap from "../lib/getAllBlocksMap";
+import { useFileHandler } from "../hooks/dist/useFileHandler";
+import { BlockLayoutItem } from "../interfaces/BlockLayoutItem";
 
 
-interface ModelItem {
-  id: string;
-  block: DspBlock;
-  dsp: "dsp0" | "dsp1";
-}
 
 interface Props {
   transformedFile: PodGo | null;
   onShowModelBuilder: () => void;
   models: ModelItem[] | null;
+  onRearangeModels: (layout: BlockLayoutItem[] ) => void;
+  setRearangedModels:  React.Dispatch<React.SetStateAction<BlockLayoutItem[] | null>>;
 }
 
 const ROW_LENGTH = 8;
@@ -114,7 +114,7 @@ const SortableBlockItem: React.FC<SortableBlockProps> = ({ id, item, active }) =
   );
 };
 
-const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, models }) => {
+const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, models, onRearangeModels, setRearangedModels }) => {
   
   const [items, setItems] = useState<{
     dsp0: (ModelItem | null)[];
@@ -237,7 +237,15 @@ const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, mo
       </div>
     );
   };
-
+  function getAllBlocks() {
+    const currentLayout= getAllBlocksMap(items.dsp0, items.dsp1);
+    console.log("-----------------------------------------");
+    console.log("Current blocks(MAP):");
+    console.log(currentLayout);
+    console.log("-----------------------------------------");
+    setRearangedModels(currentLayout);
+    onRearangeModels(currentLayout);
+  }
   const activeItem = activeId 
     ? [...items.dsp0, ...items.dsp1].find(i => i?.id === activeId) 
     : null;
@@ -278,7 +286,8 @@ const PresetEditor: React.FC<Props> = ({ transformedFile, onShowModelBuilder, mo
         </div>
       </div>
       <button
-                className={transformedFile ? " absolute right-6 bottom-25 animate-bg-shine bg-[linear-gradient(110deg,#CEE407,45%,#E8F858,55%,#CEE407)] bg-[length:200%_100%] border-[1px] text-white font-primary py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer min-w-40 min-h-20 hover:scale-101" : "border bg-[linear-gradient(110deg,#4f46e5,55%,#4f46e5)]/60 border-gray-500 w-full text-white/80 font-primary py-2 px-6 rounded-lg shadow-md transition-all cursor-pointer "}
+      onClick={getAllBlocks}
+                className={ " absolute right-6 bottom-25 animate-bg-shine bg-[linear-gradient(110deg,#CEE407,45%,#E8F858,55%,#CEE407)] bg-[length:200%_100%] border-[1px] text-white font-primary py-2 px-6 rounded-lg shadow-md transition-all duration-500 cursor-pointer min-w-40 min-h-20 hover:scale-101"}
               >
                 Save layout in file
               </button>

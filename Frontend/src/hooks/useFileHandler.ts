@@ -4,6 +4,8 @@ import { PodGo } from '../interfaces/PodGoData';
 import { DspBlock } from '../interfaces/DspBlock';
 import { mainWindowResize, modelWindowResize } from '../lib/tauriWindow';
 import { useEffect } from 'react';
+import { BlockLayoutItem } from '../interfaces/BlockLayoutItem';
+import { handleRearangeModels } from '../utils/fileUtils';
 
 export const useFileHandler = () => {
   const [filePath, setFilePath] = useState<string | null>(null);
@@ -11,6 +13,7 @@ export const useFileHandler = () => {
   const [transformedFile, setTransformedFile]= useState<PodGo | null>(null);
   const [models, setModels] = useState<{id:string,  block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>(null);
     const[showModelBuilder, setShowModelBuilder] = useState<boolean>(false)
+    const[rearangedModels, setRearangedModels] = useState<BlockLayoutItem[] | null>(null);
 
 
 
@@ -21,12 +24,12 @@ export const useFileHandler = () => {
   };
 
  const onShowModelBuilder = () => {
-    // Toggle the state properly
+
     setShowModelBuilder(prev => !prev);
   };
 
   useEffect(() => {
-    // Logs to see if the state change is being triggered
+
     console.log("showModelBuilder updated:", showModelBuilder);
     if (showModelBuilder) {
       modelWindowResize();
@@ -39,6 +42,9 @@ export const useFileHandler = () => {
     handleConvert(filePath, fileContent, convertToHlxLogic, setTransformedFile, setModels);
   };
 
+  const onRearangeModels = (layout: BlockLayoutItem[]) => {
+    handleRearangeModels(transformedFile, layout, setTransformedFile);
+  }
 
   const onSave = () =>{
     handleSaveFile(transformedFile);
@@ -49,9 +55,11 @@ export const useFileHandler = () => {
     transformedFile,
     models,
     showModelBuilder,
+    setRearangedModels,
     onShowModelBuilder,
     onSelectFile,
     onConvert,
+    onRearangeModels,
     onSave
   };
 };

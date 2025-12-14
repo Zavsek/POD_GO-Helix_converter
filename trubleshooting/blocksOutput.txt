@@ -1,0 +1,29 @@
+
+{id: 'dsp0-block0', model: 'HD2_VolPanVol', dsp: 'dsp0', index: 0, data: {…}}
+1
+: 
+{id: 'dsp0-block1', model: 'HD2_CompressorLAStudioComp', dsp: 'dsp0', index: 1, data: {…}}
+2
+: 
+{id: 'dsp0-block4', model: 'HD2_AmpWhoWatt100', dsp: 'dsp0', index: 2, data: {…}}
+3
+: 
+{id: 'dsp0-block6', model: 'HD2_CaliQ', dsp: 'dsp0', index: 3, data: {…}}
+4
+: 
+{id: 'dsp0-block7', model: 'HD2_CompressorDeluxeComp', dsp: 'dsp0', index: 4, data: {…}}
+5
+: 
+{id: 'dsp0-block2', model: 'HD2_DL4AnalogDelayStereo', dsp: 'dsp1', index: 1, data: {…}}
+6
+: 
+{id: 'dsp0-block3', model: 'VIC_DynPlate', dsp: 'dsp1', index: 4, data: {…}}
+7
+: 
+{id: 'dsp0-block5', model: 'HD2_ImpulseResponse1024', dsp: 'dsp1', index: 7, data: {…}}
+length
+: 
+8
+[[Prototype]]
+: 
+Array(0)

@@ -3,6 +3,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { PodGo } from "../interfaces/PodGoData";
 import { toast } from "react-hot-toast";
 import { DspBlock } from "../interfaces/DspBlock";
+import { BlockLayoutItem } from "../interfaces/BlockLayoutItem";
 
 export const handleSelectFile = async (
   setFilePath: React.Dispatch<React.SetStateAction<string | null>>,
@@ -101,13 +102,88 @@ const allBlocks: {id:string, block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] = [
 
 
 setModels(allBlocks);
-    toast.success("Success");
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      toast.error(err.toString());
-    } else {
-      toast.error("An unknown error occurred");
-    }
+toast.success("Success");
+} catch (err: unknown) {
+  if (err instanceof Error) {
+    toast.error(err.toString());
+  } else {
+    toast.error("An unknown error occurred");
+  }
+}
+};
+
+type FixedKeys = 'inputA' | 'inputB' | 'join' | 'outputA' | 'outputB' | 'split';
+
+export const handleRearangeModels = async (
+  transformedFile: PodGo | null,
+  rearangedModels: BlockLayoutItem[] | null,
+  setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>
+) => {
+  try {
+    if (!transformedFile || !rearangedModels) return;
+
+    let newFile: PodGo = JSON.parse(JSON.stringify(transformedFile));
+
+    const fixedKeys: FixedKeys[] = ['inputA', 'inputB', 'join', 'outputA', 'outputB', 'split'];
+
+    const newDsp0: any = {};
+    const newDsp1: any = {};
+
+
+    for (const key of fixedKeys) {
+        if (newFile.data.tone.dsp0[key]) {
+            newDsp0[key] = newFile.data.tone.dsp0[key];
+        }
+        if (newFile.data.tone.dsp1 && newFile.data.tone.dsp1[key]) {
+            newDsp1[key] = newFile.data.tone.dsp1[key];
+        }
+    }const dsp0Layout: BlockLayoutItem[] = [];
+    const dsp1Layout: BlockLayoutItem[] = [];
+rearangedModels.forEach((item) => {
+
+        const blockKey = item.id.split('-')[1]; 
+        const originalDspKey = item.id.split('-')[0]; 
+
+        let sourceDsp: any;
+        if (originalDspKey === 'dsp0') {
+            sourceDsp = transformedFile.data.tone.dsp0;
+        } else if (originalDspKey === 'dsp1' && transformedFile.data.tone.dsp1) {
+            sourceDsp = transformedFile.data.tone.dsp1;
+        } else {
+            return; 
+        }
+        
+        const targetBlock = sourceDsp[blockKey]; 
+
+        if (targetBlock) {
+
+            const newBlock = JSON.parse(JSON.stringify(targetBlock));
+
+
+            newBlock["@path"] = newBlock["@path"]; 
+            newBlock["@position"] = item.index; 
+
+         
+            if (item.dsp === 'dsp0') {
+                newDsp0[blockKey] = newBlock;
+                dsp0Layout.push(item);
+            } else if (item.dsp === 'dsp1') {
+                newDsp1[blockKey] = newBlock;
+                dsp1Layout.push(item);
+            }
+        }
+    });
+
+    newFile.data.tone.dsp0 = newDsp0;
+    newFile.data.tone.dsp1 = newDsp1;
+   
+    
+    setTransformedFile(newFile);
+    toast.success("Successfully rearranged and saved!");
+
+  } catch (error) {
+    toast.error("An unexpected error occurred during rearrangement.");
+    console.error(error);
   }
 };
 
