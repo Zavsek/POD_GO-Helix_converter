@@ -4,7 +4,10 @@ import { PodGo } from "../interfaces/PodGoData";
 import { toast } from "react-hot-toast";
 import { DspBlock } from "../interfaces/DspBlock";
 import { BlockLayoutItem } from "../interfaces/BlockLayoutItem";
+import FixedKeys from "../types/FixedKeys"
 
+
+// select file with tauri fs, stores fileContent in state
 export const handleSelectFile = async (
   setFilePath: React.Dispatch<React.SetStateAction<string | null>>,
   setFileContent: React.Dispatch<React.SetStateAction<string | null>>
@@ -52,7 +55,9 @@ export const handleSelectFile = async (
     console.error(err);
   }
 };
-
+/* Parses input file and sends it to the ConvertToHlx function then stores 
+the converted files in state and stores the models in state for rearanging.
+*/
 export const handleConvert = async (
   filePath: string | null,
   fileContent: string | null,
@@ -112,13 +117,15 @@ toast.success("Success");
 }
 };
 
-type FixedKeys = 'inputA' | 'inputB' | 'join' | 'outputA' | 'outputB' | 'split';
 
+/* gets rearanged files and makes deep copy of the transformed file
+then updates the attribues path and position
+i don't realy know how positions dont clash but as long as it works i am not complaining
+*/ 
 export const handleRearangeModels = async (
   transformedFile: PodGo | null,
   rearangedModels: BlockLayoutItem[] | null,
-  setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>
-) => {
+  setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>) => {
   try {
     if (!transformedFile || !rearangedModels) return;
 
@@ -126,7 +133,7 @@ export const handleRearangeModels = async (
 
     const fixedKeys: FixedKeys[] = ['inputA', 'inputB', 'join', 'outputA', 'outputB', 'split'];
 
-    const newDsp0: any = {};
+    const newDsp0: any= {} ;
     const newDsp1: any = {};
 
 
@@ -139,7 +146,7 @@ export const handleRearangeModels = async (
         }
     }const dsp0Layout: BlockLayoutItem[] = [];
     const dsp1Layout: BlockLayoutItem[] = [];
-rearangedModels.forEach((item) => {
+    rearangedModels.forEach((item) => {
 
         const blockKey = item.id.split('-')[1]; 
         const originalDspKey = item.id.split('-')[0]; 

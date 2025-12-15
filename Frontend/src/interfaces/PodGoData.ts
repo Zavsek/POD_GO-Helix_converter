@@ -1,5 +1,5 @@
 import { DspObject } from "../types/DspObject";
-
+//basically the entire structure of the .hlx and .pgp json files
 export interface PodGoData {
   device?: number;
   device_version?: number;
