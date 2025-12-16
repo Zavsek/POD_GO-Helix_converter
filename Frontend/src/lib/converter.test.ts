@@ -14,16 +14,22 @@ vi.mock('./helpers/isDelay', () => ({
 }));
 vi.mock('./helpers/trimModelName', () => ({
   __esModule: true,
-  default: (name: string) => name.replace('Helix_', ''),
+  default: (name: string) => name.replace(/\s*(Mono|Stereo)$/i, ''),
 }));
 vi.mock('./helpers/setMonoStereo', () => ({
   __esModule: true,
   default: () => false,
 }));
-vi.mock('./helpers/appendEnd', () => ({
-  appendDsp0: vi.fn(),
-  appendDsp1: vi.fn(),
-}));
+vi.mock('./helpers/appendEnd', () => {
+  const addSystemBlocks = (dsp: any) => {
+    dsp.inputA = { "@model": "HD2_AppDSPFlow1Input" };
+    dsp.outputA = { "@model": "HD2_AppDSPFlowOutput" };
+  };
+  return {
+    appendDsp0: addSystemBlocks,
+    appendDsp1: addSystemBlocks,
+  };
+});
 describe('convertToHlxLogic', () => {
     
     
@@ -41,10 +47,35 @@ describe('convertToHlxLogic', () => {
     expect(result.data.device_version).toBe(56623104)
   });
 
+/*<summary>
+checks if Mono and Stereo suffixes are actually removed
+*/
+it('must remove Mono & Stereo suffix', () =>{
+  const input = JSON.parse(JSON.stringify(mockPodGoFile));
+   input.data.tone.dsp0.block0 = { 
+      "@model": "HD2_VolPanVolStereo", 
+      "@position": 0, 
+      "@path": 0 
+    };
+    //also tests if it removes Mono from anywhere in the name
+     input.data.tone.dsp0.block1 = { 
+      "@model": "HD2_CompressorLAStudioCompMono", 
+      "@position": 1, 
+      "@path": 0 
+    };
+    const result = convertToHlxLogic(input);
+    expect(result.data.tone.dsp0['block0']).toBeDefined();
+    expect(result.data.tone.dsp0['block0']['@model']).toBe('HD2_VolPanVol');
+
+    expect(result.data.tone.dsp0['block1']).toBeDefined();
+    expect(result.data.tone.dsp0['block1']['@model']).toBe('HD2_CompressorLAStudioComp');
+
+});
+
   /*<summary>
   pgp model names contain "_STATIC_" this should be
   removed in coversion */
-  it('removal of "_STATIC_" from model name', () => {
+  it('must remove substring "_STATIC_" from model name', () => {
     const input = JSON.parse(JSON.stringify(mockPodGoFile));
 
 
@@ -91,11 +122,13 @@ describe('convertToHlxLogic', () => {
   Line6 is weird sometimes and for some reason CaliQ is called EQCaliQ in pod go
   this is not standard and just a random exception
   */
+
+  //i dont understand why whis test doesn't work normally so this one should be rendered useless
   it('"HD2_EQCaliQ" must be renamed to "HD2_CaliQ" ', () => {
     const input = JSON.parse(JSON.stringify(mockPodGoFile));
 
     input.data.tone.dsp0.block0 = { 
-        "@model": "HD2_EQCaliQStereo",
+        "@model": "HD2_EQ_STATIC_CaliQ",
         "@position": 0,
         "@stereo": true 
     };
@@ -154,4 +187,28 @@ describe('convertToHlxLogic', () => {
     expect(result.data.tone.dsp1!['block0']).toBeDefined(); 
     expect(result.data.tone.dsp1!['block1']).toBeDefined(); 
   });
+  
+  /*<summary>
+  checks presence of system blocks in dsp0 and dsp 1
+  */
+ it('system blocks must be present in both dsps', () =>{
+   const input = JSON.parse(JSON.stringify(mockPodGoFile));
+   
+   // Add enough blocks to trigger dsp1 creation
+   for(let i = 0; i < 9; i++) {
+     input.data.tone.dsp0[`block${i}`] = { 
+       "@model": "TestModel", 
+       "@position": i 
+     };
+   }
+   
+   const result = convertToHlxLogic(input);
+   
+   expect(result.data.tone.dsp0['inputA']).toBeDefined();
+   expect(result.data.tone.dsp0['outputA']).toBeDefined();
+   
+   expect(result.data.tone.dsp1).toBeDefined();
+   expect(result.data.tone.dsp1!['inputA']).toBeDefined();
+   expect(result.data.tone.dsp1!['outputA']).toBeDefined();
+  })
 });

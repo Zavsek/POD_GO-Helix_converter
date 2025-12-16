@@ -85,7 +85,7 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
 
     }
     //for some reason this is the way it is
-    else if (model === "HD2_EQCaliQStereo" ){
+    else if (model === "HD2_EQCaliQ" ){
         blok["@model"] = "HD2_CaliQ";
         blok["@stereo"] = true;
     }
