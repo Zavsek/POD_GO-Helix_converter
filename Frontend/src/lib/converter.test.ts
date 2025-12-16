@@ -46,7 +46,8 @@ describe('convertToHlxLogic', () => {
   removed in coversion */
   it('removal of "_STATIC_" from model name', () => {
     const input = JSON.parse(JSON.stringify(mockPodGoFile));
-    
+
+
     input.data.tone.dsp0.block0 = { 
         "@model": "HD2_Distortion_Minotaur_STATIC_", 
         "@position": 0,
@@ -75,16 +76,15 @@ describe('convertToHlxLogic', () => {
     const result = convertToHlxLogic(input);
 
 
-    expect(result.data.tone.dsp0['block0']['@model']).toBe("HD2_Distortion_Minotaur");
+   expect(result.data.tone.dsp0['block0']['@model']).toBe("HD2_Distortion_Minotaur");
     expect(result.data.tone.dsp0['block0']['@position']).toBe(0); 
 
-
-    expect(result.data.tone.dsp0['block1']).toBeDefined();
-    expect(result.data.tone.dsp0['block1']['@model']).toBe("HD2_Delay_SimpleDelay");
-    expect(result.data.tone.dsp0['block1']['@position']).toBe(1); 
+    expect(result.data.tone.dsp0['block1']).toBeUndefined();
+    expect(result.data.tone.dsp0['block2']['@model']).toBe("HD2_Delay_SimpleDelay");
+    expect(result.data.tone.dsp0['block2']['@position']).toBe(2); 
     
 
-    expect(result.data.tone.dsp0['block2']).toBeUndefined();
+    expect(result.data.tone.dsp0['block2']).toBeDefined();
 });
 
   /*<summary>
@@ -95,7 +95,7 @@ describe('convertToHlxLogic', () => {
     const input = JSON.parse(JSON.stringify(mockPodGoFile));
 
     input.data.tone.dsp0.block0 = { 
-        "@model": "HD2_EQCaliQMono",
+        "@model": "HD2_EQCaliQStereo",
         "@position": 0,
         "@stereo": true 
     };
@@ -104,7 +104,7 @@ describe('convertToHlxLogic', () => {
 
     expect(result.data.tone.dsp0['block0']).toBeDefined();
     expect(result.data.tone.dsp0['block0']['@model']).toBe("HD2_CaliQ");
-    expect(result.data.tone.dsp0['block0']['@stereo']).toBe(false);
+    expect(result.data.tone.dsp0['block0']['@stereo']).toBe(true);
   });
 
 

@@ -8,11 +8,6 @@ export const mockPodGoFile: PodGo = {
     meta: { name: "Test Preset" },
     tone: {
       dsp0: {
-        inputA: { "@model": "AppDSPFlowInput", "@path": 0 },
-
-        block0: { "@model": "HD2_VolPanVolStereo", "@position": 0, "@path": 0 },
-        block1: { "@model": "HD2_CompressorLAStudioCompStereo", "@position": 1, "@path": 0 },
-        outputA: { "@model": "AppDSPFlowOutput", "@path": 0 }
       },
       dsp1: {}
     }

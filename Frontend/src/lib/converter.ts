@@ -85,9 +85,9 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
 
     }
     //for some reason this is the way it is
-    else if (model === "HD2_EQCaliQ"){
+    else if (model === "HD2_EQCaliQStereo" ){
         blok["@model"] = "HD2_CaliQ";
-        blok["@stereo"] = false;
+        blok["@stereo"] = true;
     }
      else {
       const stereoValue = setMonoStereo(model) ;
