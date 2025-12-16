@@ -61,9 +61,10 @@ the converted files in state and stores the models in state for rearanging.
 export const handleConvert = async (
   filePath: string | null,
   fileContent: string | null,
-  convertToHlxLogic: (data: any) => any,
+  convertToHlxLogic: (data: PodGo) => {convertedData:PodGo, presetName:string},
   setTransformedFile: React.Dispatch<React.SetStateAction<PodGo | null>>,
-   setModels: React.Dispatch<React.SetStateAction<{id: string, block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>>
+   setModels: React.Dispatch<React.SetStateAction<{id: string, block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>>,
+   setStoredFileName: React.Dispatch<React.SetStateAction<string| null>>
 ) => {
   if (!filePath && !fileContent) {
     toast.error("No File Selected!");
@@ -83,7 +84,8 @@ export const handleConvert = async (
     }
 
     const podGoData: PodGo = JSON.parse(contentToConvert);
-    const convertedData: PodGo = convertToHlxLogic(podGoData);
+    const {convertedData, presetName} = convertToHlxLogic(podGoData);
+    setStoredFileName(presetName);
     setTransformedFile(convertedData);
 
    const dsp0Blocks = convertedData.data.tone.dsp0 ?? {};
@@ -194,14 +196,14 @@ export const handleRearangeModels = async (
   }
 };
 
-export const handleSaveFile = async (convertedData: PodGo | null) => {
+export const handleSaveFile = async (convertedData: PodGo | null, storedFileName: string|null) => {
   if (!convertedData) {
     toast.error("No file to save");
     return;
   }
   try {
     const savePath: string | null = await save({
-      defaultPath: "output.hlx",
+      defaultPath: `${!storedFileName ? "output" : storedFileName}.hlx`,
       filters: [{ name: "Helix Files", extensions: ["hlx"] }],
     });
 

@@ -6,9 +6,10 @@ import { PodGo } from "../interfaces/PodGoData";
 import { DspObject } from "../types/DspObject";
 import { DspBlock } from "../interfaces/DspBlock";
 import isDelay from "./helpers/isDelay";
+import checkForWierdExceptions from "./helpers/wierdExceptions";
 
 
-export function convertToHlxLogic(podGo: PodGo) :  PodGo{
+export function convertToHlxLogic(podGo: PodGo) :  {convertedData:PodGo, presetName:string}{
   const presetName = podGo.data?.meta?.name || "Untitled";
 
   //set of hlx metadata taken from my own installment of helix native
@@ -30,7 +31,7 @@ export function convertToHlxLogic(podGo: PodGo) :  PodGo{
   podGo.data.tone.dsp0 = dsp0;
   podGo.data.tone.dsp1 = dsp1;
 
-  return podGo;
+  return {convertedData: podGo, presetName:presetName};
 }
 
 function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
@@ -70,26 +71,10 @@ function convertDsp(dsp: DspObject): { dsp0: DspObject; dsp1: DspObject }  {
     if (model.toLowerCase().includes("fxloop")) {
       return;
     }
-    const[legacyDelay, delayRetainsStereo] : [boolean, boolean] = isDelay(model );
-    // Stereo/Mono logic
-    if (isReverb(model)) {
-      const stereoReverbs = [
-        "DynamicHall", "DynamicPlate", "DynamicRoom", "DynamicAmbiance",
-        "Shimmer", "HotSprings", "Glitz", "Ganymede", "SearchLights",
-        "Plateaux", "DoubleTank"
-      ];
-      const isStereo = stereoReverbs.some(r => model.toLowerCase().includes(r.toLowerCase()));
-      blok["@stereo"] = isStereo;
-    }
-    else if(legacyDelay){
-
-    }
-    //for some reason this is the way it is
-    else if (model === "HD2_EQCaliQ" ){
-        blok["@model"] = "HD2_CaliQ";
-        blok["@stereo"] = true;
-    }
-     else {
+const [processedBlok, handled] = checkForWierdExceptions(model, blok);
+   
+    blok = processedBlok;
+     if(!handled) {
       const stereoValue = setMonoStereo(model) ;
       blok["@stereo"] = stereoValue !== null ? stereoValue : false;
     }

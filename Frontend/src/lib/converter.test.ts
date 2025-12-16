@@ -40,11 +40,11 @@ describe('convertToHlxLogic', () => {
     // deep copy of mock file
     const input = JSON.parse(JSON.stringify(mockPodGoFile));
     
-    const result = convertToHlxLogic(input);
+    const {convertedData, presetName} = convertToHlxLogic(input);
 
-    expect(result.data.meta.application).toBe("Helix Native");
-    expect(result.data.device).toBe(2162944);
-    expect(result.data.device_version).toBe(56623104)
+    expect(convertedData.data.meta.application).toBe("Helix Native");
+    expect(convertedData.data.device).toBe(2162944);
+    expect(convertedData.data.device_version).toBe(56623104)
   });
 
 /*<summary>
@@ -63,12 +63,12 @@ it('must remove Mono & Stereo suffix', () =>{
       "@position": 1, 
       "@path": 0 
     };
-    const result = convertToHlxLogic(input);
-    expect(result.data.tone.dsp0['block0']).toBeDefined();
-    expect(result.data.tone.dsp0['block0']['@model']).toBe('HD2_VolPanVol');
+    const {convertedData, presetName} = convertToHlxLogic(input);
+    expect(convertedData.data.tone.dsp0['block0']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block0']['@model']).toBe('HD2_VolPanVol');
 
-    expect(result.data.tone.dsp0['block1']).toBeDefined();
-    expect(result.data.tone.dsp0['block1']['@model']).toBe('HD2_CompressorLAStudioComp');
+    expect(convertedData.data.tone.dsp0['block1']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block1']['@model']).toBe('HD2_CompressorLAStudioComp');
 
 });
 
@@ -85,10 +85,10 @@ it('must remove Mono & Stereo suffix', () =>{
         "@path": 0 
     };
 
-    const result = convertToHlxLogic(input);
+    const {convertedData, presetName} = convertToHlxLogic(input);
 
-    expect(result.data.tone.dsp0['block0']).toBeDefined();
-    expect(result.data.tone.dsp0['block0']['@model']).toBe("HD2_Distortion_Minotaur");
+    expect(convertedData.data.tone.dsp0['block0']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block0']['@model']).toBe("HD2_Distortion_Minotaur");
   });
 
   /*<summary>
@@ -104,18 +104,18 @@ it('must remove Mono & Stereo suffix', () =>{
 
     delete input.data.tone.dsp0.block3; 
 
-    const result = convertToHlxLogic(input);
+    const {convertedData, presetName} = convertToHlxLogic(input);
 
 
-   expect(result.data.tone.dsp0['block0']['@model']).toBe("HD2_Distortion_Minotaur");
-    expect(result.data.tone.dsp0['block0']['@position']).toBe(0); 
+   expect(convertedData.data.tone.dsp0['block0']['@model']).toBe("HD2_Distortion_Minotaur");
+    expect(convertedData.data.tone.dsp0['block0']['@position']).toBe(0); 
 
-    expect(result.data.tone.dsp0['block1']).toBeUndefined();
-    expect(result.data.tone.dsp0['block2']['@model']).toBe("HD2_Delay_SimpleDelay");
-    expect(result.data.tone.dsp0['block2']['@position']).toBe(2); 
+    expect(convertedData.data.tone.dsp0['block1']).toBeUndefined();
+    expect(convertedData.data.tone.dsp0['block2']['@model']).toBe("HD2_Delay_SimpleDelay");
+    expect(convertedData.data.tone.dsp0['block2']['@position']).toBe(2); 
     
 
-    expect(result.data.tone.dsp0['block2']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block2']).toBeDefined();
 });
 
   /*<summary>
@@ -133,11 +133,11 @@ it('must remove Mono & Stereo suffix', () =>{
         "@stereo": true 
     };
 
-    const result = convertToHlxLogic(input);
+    const {convertedData, presetName} = convertToHlxLogic(input);
 
-    expect(result.data.tone.dsp0['block0']).toBeDefined();
-    expect(result.data.tone.dsp0['block0']['@model']).toBe("HD2_CaliQ");
-    expect(result.data.tone.dsp0['block0']['@stereo']).toBe(true);
+    expect(convertedData.data.tone.dsp0['block0']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block0']['@model']).toBe("HD2_CaliQ");
+    expect(convertedData.data.tone.dsp0['block0']['@stereo']).toBe(true);
   });
 
 
@@ -151,11 +151,11 @@ it('must remove Mono & Stereo suffix', () =>{
 
     input.data.tone.dsp0.block1 = { "@position": 1 } as any; 
 
-    const result = convertToHlxLogic(input);
+    const {convertedData, presetName} = convertToHlxLogic(input);
 
 
-    expect(result.data.tone.dsp0['block0']).toBeUndefined();
-    expect(result.data.tone.dsp0['block1']).toBeUndefined();
+    expect(convertedData.data.tone.dsp0['block0']).toBeUndefined();
+    expect(convertedData.data.tone.dsp0['block1']).toBeUndefined();
   });
 
 
@@ -174,18 +174,18 @@ it('must remove Mono & Stereo suffix', () =>{
             "@position": i 
         };
     }
-    const result = convertToHlxLogic(input);
-    expect(result.data.tone.dsp0).toBeDefined();
+    const {convertedData, presetName} = convertToHlxLogic(input);
+    expect(convertedData.data.tone.dsp0).toBeDefined();
 
-    expect(result.data.tone.dsp1).toBeDefined();
+    expect(convertedData.data.tone.dsp1).toBeDefined();
    
-    expect(result.data.tone.dsp0['block0']).toBeDefined();
-    expect(result.data.tone.dsp0['block7']).toBeDefined();
-    expect(result.data.tone.dsp0['block8']).toBeUndefined(); 
+    expect(convertedData.data.tone.dsp0['block0']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block7']).toBeDefined();
+    expect(convertedData.data.tone.dsp0['block8']).toBeUndefined(); 
 
    
-    expect(result.data.tone.dsp1!['block0']).toBeDefined(); 
-    expect(result.data.tone.dsp1!['block1']).toBeDefined(); 
+    expect(convertedData.data.tone.dsp1!['block0']).toBeDefined(); 
+    expect(convertedData.data.tone.dsp1!['block1']).toBeDefined(); 
   });
   
   /*<summary>
@@ -202,13 +202,13 @@ it('must remove Mono & Stereo suffix', () =>{
      };
    }
    
-   const result = convertToHlxLogic(input);
+   const {convertedData, presetName} = convertToHlxLogic(input);
    
-   expect(result.data.tone.dsp0['inputA']).toBeDefined();
-   expect(result.data.tone.dsp0['outputA']).toBeDefined();
+   expect(convertedData.data.tone.dsp0['inputA']).toBeDefined();
+   expect(convertedData.data.tone.dsp0['outputA']).toBeDefined();
    
-   expect(result.data.tone.dsp1).toBeDefined();
-   expect(result.data.tone.dsp1!['inputA']).toBeDefined();
-   expect(result.data.tone.dsp1!['outputA']).toBeDefined();
+   expect(convertedData.data.tone.dsp1).toBeDefined();
+   expect(convertedData.data.tone.dsp1!['inputA']).toBeDefined();
+   expect(convertedData.data.tone.dsp1!['outputA']).toBeDefined();
   })
 });

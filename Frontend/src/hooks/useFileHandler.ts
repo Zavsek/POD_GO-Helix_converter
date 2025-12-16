@@ -14,6 +14,7 @@ export const useFileHandler = () => {
   const [models, setModels] = useState<{id:string,  block: DspBlock, dsp: 'dsp0' | 'dsp1' }[] | null>(null);
     const[showModelBuilder, setShowModelBuilder] = useState<boolean>(false)
     const[rearangedModels, setRearangedModels] = useState<BlockLayoutItem[] | null>(null);
+    const[storedFileName, setStoredFileName] = useState<string |null>(null);
 
 
 
@@ -38,8 +39,8 @@ export const useFileHandler = () => {
     }
   }, [showModelBuilder]);
 
-  const onConvert = (convertToHlxLogic: (data: any) => any) => {
-    handleConvert(filePath, fileContent, convertToHlxLogic, setTransformedFile, setModels);
+  const onConvert = (convertToHlxLogic: (data: PodGo) => { convertedData: PodGo; presetName: string }) => {
+    handleConvert(filePath, fileContent, convertToHlxLogic, setTransformedFile, setModels, setStoredFileName);
   };
 
   const onRearangeModels = (layout: BlockLayoutItem[]) => {
@@ -47,7 +48,7 @@ export const useFileHandler = () => {
   }
 
   const onSave = () =>{
-    handleSaveFile(transformedFile);
+    handleSaveFile(transformedFile, storedFileName);
   }
   return {
     filePath,
